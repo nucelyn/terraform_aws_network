@@ -15,8 +15,7 @@ resource "aws_vpc" "terraform" {
     vpc_id = aws_vpc.terraform.id
     cidr_block = var.pubsubnet_cidr_block
 
-    tags = var.vpc_tags
-       name = "Public_Subnet"
+    tags = merge(var.vpc_tags, { Name = "Public_Subnet" })
     }
     
   resource "aws_subnet" "private" {
@@ -24,8 +23,7 @@ resource "aws_vpc" "terraform" {
     cidr_block = var.privsubnet_cidr_block
 
     tags = var.vpc_tags
-       name = "Private_Subnet"
-    }
+    tags = merge(var.vpc_tags, { Name = "Private_Subnet" })
     
   #creating the route table
   resource "aws_route_table" "public" {
@@ -53,13 +51,12 @@ resource "aws_vpc" "terraform" {
     route_table_id = aws_route_table.private_rt.id
     }
 
-  resource "aws_nat_gateway" "nat" {
+  resource "aws_nat_gateway" "eip" {
     allocation_id = aws_eip.nat.id
     subnet_id = aws_subnet.public.id
     tags = var.vpc_tags
        name = "NATGW"
-
-    dependepends_on = [ aws_internet_gateway.gw, aws_eip.nat ]   
+    tags = merge(var.vpc_tags, { Name = "NATGW" })
     }
 
   resource "aws_eip" "eip" {
